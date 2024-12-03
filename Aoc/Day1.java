@@ -1,21 +1,12 @@
+package Aoc;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-class AOC24 {
+public class Day1 {
 
-    public static void main(String[] args) {
-        // System.out.println(d1p1(loadDataFile("day_1_input")));
-        System.err.println(d1p2(loadDataFile("day_1_input")));
-    }
-
-    // day 1
-    public static int d1p1(String input) {
+    public static int Part1(String input) {
         // split over newlines first, then over spaces
         String[] lines = input.split("\n");
 
@@ -41,7 +32,7 @@ class AOC24 {
         return total;
     }
 
-    public static int d1p2(String input) {
+    public static int Part2(String input) {
         // split over newlines first, then over spaces
         String[] lines = input.split("\n");
 
@@ -68,14 +59,4 @@ class AOC24 {
 
         return total;
     }
-
-    // helpers
-    public static String loadDataFile(String path) {
-        try {
-            return new String(Files.readAllBytes(Paths.get(path)), StandardCharsets.UTF_8);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
 }
