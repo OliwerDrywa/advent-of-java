@@ -7,8 +7,8 @@ import java.nio.file.Paths;
 public class Today {
 
     public static void main(String[] args) {
-        String input = loadDataFile("d2_input");
-        System.out.println(Aoc.Day2.Part2(input));
+        String input = loadDataFile("d3_input");
+        System.out.println(Aoc.Day3.Part2(input));
     }
 
     public static String loadDataFile(String path) {
