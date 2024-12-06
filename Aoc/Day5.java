@@ -1,134 +1,82 @@
 package Aoc;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Stack;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class Day5 {
-
     public static int Part1(String input) {
-        String[] inputs = input.split("\n\n");
+        String[] sections = input.split("\n\n");
+        List<Rule> rules = parseRules(sections[0]);
+        List<List<String>> updates = parseUpdates(sections[1]);
 
-        String[][] rules = Arrays.stream(inputs[0].split("\n"))
-                .map(x -> Arrays.stream(x.split("\\|")).toArray(String[]::new))
-                .toArray(String[][]::new);
-
-        String[][] updates = Arrays.stream(inputs[1].split("\n"))
-                .map(x -> Arrays.stream(x.split(",")).toArray(String[]::new))
-                .toArray(String[][]::new);
-
-        int total = 0;
-        for (String[] nums : updates) {
-            List<String> numList = Arrays.asList(nums);
-
-            // for each rule    
-            // check if all the rules are satisfied
-            boolean rulesSatisfied = true;
-            for (String[] r : rules) {
-                String before = r[0];
-                String after = r[1];
-
-                // see if both numbers in the rule are in the update
-                // if not, skip to the next rule
-                if (!numList.contains(before) || !numList.contains(after)) {
-                    continue;
-                }
-
-                // see if the "before" number appears before the "after" number
-                int beforeIndex = numList.indexOf(before);
-                int afterIndex = numList.indexOf(after);
-                if (beforeIndex > afterIndex) {
-                    rulesSatisfied = false;
-                    break;
-                }
-            }
-
-            if (rulesSatisfied) {
-                String middle = nums[(nums.length - 1) / 2];
-                total += Integer.parseInt(middle);
-            }
-
-            // if so, get the middle number and add it to the total
-        }
-
-        return total;
+        return updates.stream()
+                .filter(update -> isValidUpdate(update, rules))
+                .mapToInt(Day5::getMiddleValue)
+                .sum();
     }
 
     public static int Part2(String input) {
-        String[] inputs = input.split("\n\n");
+        String[] sections = input.split("\n\n");
+        List<Rule> rules = parseRules(sections[0]);
+        List<List<String>> updates = parseUpdates(sections[1]);
 
-        String[][] rules = Arrays.stream(inputs[0].split("\n"))
-                .map(x -> Arrays.stream(x.split("\\|")).toArray(String[]::new))
-                .toArray(String[][]::new);
+        return updates.stream()
+                .filter(update -> !isValidUpdate(update, rules))
+                .map(update -> {
+                    ArrayList<String> sorted = new ArrayList<>(update);
+                    sortAccordingToRules(sorted, rules);
+                    return sorted;
+                })
+                .mapToInt(Day5::getMiddleValue)
+                .sum();
+    }
 
-        String[][] updates = Arrays.stream(inputs[1].split("\n"))
-                .map(x -> Arrays.stream(x.split(",")).toArray(String[]::new))
-                .toArray(String[][]::new);
+    private static class Rule {
 
-        Stack<String[]> wrongUpdates = new Stack<>();
+        final String before;
+        final String after;
 
-        for (String[] nums : updates) {
-            List<String> numList = Arrays.asList(nums);
-
-            // for each rule    
-            // check if all the rules are satisfied
-            boolean rulesSatisfied = true;
-            for (String[] r : rules) {
-                String before = r[0];
-                String after = r[1];
-
-                // see if both numbers in the rule are in the update
-                // if not, skip to the next rule
-                if (!numList.contains(before) || !numList.contains(after)) {
-                    continue;
-                }
-
-                // see if the "before" number appears before the "after" number
-                int beforeIndex = numList.indexOf(before);
-                int afterIndex = numList.indexOf(after);
-                if (beforeIndex > afterIndex) {
-                    rulesSatisfied = false;
-                    break;
-                }
-            }
-
-            if (!rulesSatisfied) {
-                wrongUpdates.push(nums);
-            }
+        Rule(String before, String after) {
+            this.before = before;
+            this.after = after;
         }
+    }
 
-        int total = 0;
-        for (String[] nums : wrongUpdates) {
-            // System.out.println();
-            // System.out.println(Arrays.toString(nums));
+    private static List<Rule> parseRules(String input) {
+        return Arrays.stream(input.split("\n"))
+                .map(line -> line.split("\\|"))
+                .map(parts -> new Rule(parts[0], parts[1]))
+                .collect(Collectors.toList());
+    }
 
-            // sort the numbers in the update
-            for (int i = 0; i < nums.length; i++) {
-                for (int j = i + 1; j < nums.length; j++) {
+    private static List<List<String>> parseUpdates(String input) {
+        return Arrays.stream(input.split("\n"))
+                .map(line -> Arrays.asList(line.split(",")))
+                .collect(Collectors.toList());
+    }
 
-                    for (String[] r : rules) {
-                        String before = r[0];
-                        String after = r[1];
+    private static boolean isValidUpdate(List<String> update, List<Rule> rules) {
+        return rules.stream().allMatch(rule -> {
+            if (!update.contains(rule.before) || !update.contains(rule.after)) {
+                return true;
+            }
+            return update.indexOf(rule.before) < update.indexOf(rule.after);
+        });
+    }
 
-                        // see if both numbers in the rule are in the update
-                        // if not, skip to the next rule
-                        if (nums[i].equals(after) && nums[j].equals(before)) {
-                            // if the "before" number appears before the "after" number
-                            // then sort so that the "before" number is first
-                            String temp = nums[i];
-                            nums[i] = nums[j];
-                            nums[j] = temp;
+    private static int getMiddleValue(List<String> numbers) {
+        return Integer.parseInt(numbers.get((numbers.size() - 1) / 2));
+    }
 
-                        }
+    private static void sortAccordingToRules(List<String> numbers, List<Rule> rules) {
+        for (int i = 0; i < numbers.size(); i++) {
+            for (int j = i + 1; j < numbers.size(); j++) {
+                for (Rule rule : rules) {
+                    if (numbers.get(i).equals(rule.after) && numbers.get(j).equals(rule.before)) {
+                        Collections.swap(numbers, i, j);
                     }
                 }
             }
-
-            // System.out.println("sorted: " + Arrays.toString(nums));
-            String middle = nums[(nums.length - 1) / 2];
-            total += Integer.parseInt(middle);
         }
-
-        return total;
     }
 }
