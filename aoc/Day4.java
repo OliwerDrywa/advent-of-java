@@ -1,4 +1,4 @@
-package Aoc;
+package aoc;
 
 import java.util.Arrays;
 

@@ -1,9 +1,10 @@
-package Aoc;
+package aoc;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class Day5 {
+
     public static int Part1(String input) {
         String[] sections = input.split("\n\n");
         List<Rule> rules = parseRules(sections[0]);

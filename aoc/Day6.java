@@ -1,4 +1,4 @@
-package Aoc;
+package aoc;
 
 public class Day6 {
 
